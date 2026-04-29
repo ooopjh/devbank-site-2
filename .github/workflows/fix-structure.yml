@@ -1,0 +1,112 @@
+name: Fix Next.js folder structure
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fix-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create target directories
+        run: |
+          set -euo pipefail
+          mkdir -p app components public .github/workflows
+
+      - name: Move Next.js app entry files into app/
+        run: |
+          set -euo pipefail
+
+          # Move only if they exist at root (avoid failing if already moved)
+          if [ -f "page.tsx" ]; then git mv -f "page.tsx" "app/page.tsx"; fi
+          if [ -f "layout.tsx" ]; then git mv -f "layout.tsx" "app/layout.tsx"; fi
+          if [ -f "globals.css" ]; then git mv -f "globals.css" "app/globals.css"; fi
+
+      - name: Move remaining root .tsx files into components/
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # Move all TSX files in the repo root EXCEPT the Next.js app files (already moved above).
+          # This matches your list (Cursor.tsx, Hero.tsx, etc.) and any other root-level TSX components.
+          for f in *.tsx; do
+            case "$f" in
+              page.tsx|layout.tsx) ;;
+              *) git mv -f "$f" "components/$f" ;;
+            esac
+          done
+
+      - name: Move root .mp4 files into public/
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          for f in *.mp4; do
+            git mv -f "$f" "public/$f"
+          done
+
+      - name: Write root package.json (overwrite)
+        run: |
+          set -euo pipefail
+          cat > package.json <<'JSON'
+          {
+            "name": "devbank-ai",
+            "version": "0.1.0",
+            "private": true,
+            "scripts": {
+              "dev": "next dev",
+              "build": "next build",
+              "start": "next start"
+            },
+            "dependencies": {
+              "@studio-freight/react-lenis": "^0.0.47",
+              "framer-motion": "^11.0.8",
+              "next": "14.1.0",
+              "react": "^18",
+              "react-dom": "^18",
+              "tailwind-merge": "^2.2.1",
+              "clsx": "^2.1.0"
+            },
+            "devDependencies": {
+              "autoprefixer": "^10.0.1",
+              "postcss": "^8",
+              "tailwindcss": "^3.3.0",
+              "typescript": "^5"
+            }
+          }
+          JSON
+
+      - name: Show resulting changes
+        run: |
+          set -euo pipefail
+          echo "Git status:"
+          git status --porcelain=v1
+          echo
+          echo "Tree (top-level):"
+          ls -la
+
+      - name: Commit and push to main (if changes exist)
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git add -A
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "Fix Next.js folder structure (move files + update package.json)"
+          git push origin HEAD:main
