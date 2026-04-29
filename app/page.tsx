@@ -1,9 +1,9 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import HudLab from "@/components/HudLab";
-import TemporalSlider from "@/components/TemporalSlider";
-import FeatureGrid from "@/components/FeatureCards";
-import TerminalWaitlist from "@/components/TerminalWaitlist";
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
+import HudLab from "../components/HudLab";
+import TemporalSlider from "../components/TemporalSlider";
+import FeatureGrid from "../components/FeatureCards";
+import TerminalWaitlist from "../components/TerminalWaitlist";
 
 export default function Page() {
   return (
