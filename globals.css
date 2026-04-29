@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  cursor: none !important;
+}
+
+body {
+  background: #050505;
+  color: white;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 245, 255, 0.3);
+  border-radius: 10px;
+}
+
+@layer utilities {
+  .animate-hud-flicker {
+    animation: hud-flicker 0.3s ease-in-out infinite alternate;
+  }
+  .animate-scan-line {
+    animation: scan-line 8s linear infinite;
+  }
+}
+
+@keyframes hud-flicker {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.04;
+  background-image: url("https://res.cloudinary.com/dn7vsy9al/image/upload/v1709121175/noise_ocv9ub.png");
+}
